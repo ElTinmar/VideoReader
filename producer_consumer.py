@@ -1,4 +1,4 @@
-from multiprocessing import Process, Queue
+from multiprocessing import Process, Queue, Lock
 import cv2
 import time
 import os
@@ -37,20 +37,25 @@ def producer(path, use_gpu, frame_queue, timeout, max_retry):
     frame_queue.cancel_join_thread()
     stream.release()
 
-def consumer(frame_queue, result_queue, process_num, timeout, max_retry, 
+def consumer(frame_queue, result_queue, lock, process_num, timeout, max_retry, 
             process_fun):
     """process images from the queue """
 
     retry = 0
 
-    while True: 
+    while True:
+        lock.acquire()
         if not frame_queue.empty():
             # get frame and frame number from the queue
-            frame, frame_num = frame_queue.get()                                                                                                             
+            frame, frame_num = frame_queue.get_nowait()
+            lock.release()
+
             # do some processing
             process_fun(frame,frame_num,frame_queue,result_queue)
 
         else:
+            lock.release()
+
             # Queue is empty, wait for producer
             while frame_queue.empty() and retry < max_retry:
                 time.sleep(timeout)
@@ -61,15 +66,17 @@ def consumer(frame_queue, result_queue, process_num, timeout, max_retry,
             else:
                 retry = 0
     
-def start(frame_queue, result_queue, videofile, n_consumers=1, 
+def start(frame_queue, result_queue, lock, videofile, n_consumers=1, 
           timeout=0.01, max_retry=200, use_gpu=False):
     """spawn all the processes"""
 
     # start consumers and producers                                             
     consumer_process = [];                                                      
     for i in range(n_consumers):                                                
-        p = Process(target=consumer, 
-                args=(frame_queue, result_queue, i, timeout, max_retry,process))
+        p = Process(
+        target=consumer, 
+        args=(frame_queue, result_queue, lock, i, timeout, max_retry, process)
+        )
         consumer_process.append(p)                                              
         p.start()
 
@@ -84,16 +91,17 @@ def start(frame_queue, result_queue, videofile, n_consumers=1,
 
 def process(frame,frame_num,frame_queue,result_queue):
     """actual image processing code goes here"""
-
-    if frame_num % 100 == 0:                                                    
-        print((frame_queue.qsize(), frame_num))
+    
+    print((frame_queue.qsize(), frame_num))
 
 if __name__ == "__main__":
     
     # set parameters
+    lock = Lock()
     frame_queue = Queue(maxsize = 2048)
     result_queue = Queue()
-    videofile = '/home/martin/Desktop/forEmi/2021_07_26_B.avi'
+    videofile = '/home/martin/jumanji.mp4'
     n_consumers = 10
 
-    start(frame_queue, result_queue, videofile, n_consumers, use_gpu=False)
+    start(frame_queue, result_queue, lock, videofile, 
+        n_consumers, use_gpu=False)
