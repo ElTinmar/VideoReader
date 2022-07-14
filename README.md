@@ -162,8 +162,6 @@ Intel® HD Graphics 2000
 
 * Using time.sleep as a synthetic load (not CPU intensive)
 
-Execution times were collected using:
-
 | Command | Processing time per frame | #Consumers | Hardware acceleration | Real time |
 | --- | --- | --- | --- | --- |
 | matlab -nodesktop -r "tic; run('naive.m'); toc; exit;" | 100 ms | NA | No | 7m06,613s |
