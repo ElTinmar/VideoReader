@@ -145,4 +145,5 @@ Execution times were collected using:
 | time python3 producer_consumer.py | 100 ms | 2 | No | 3m23,020s |
 | time python3 producer_consumer.py | 100 ms | 3 | No | 2m15,463s |
 | time python3 producer_consumer.py | 100 ms | 4 | No | 1m41,924s |
+| time python3 producer_consumer.py | 100 ms | 5 | No | 1m21,792s |
 
