@@ -237,4 +237,5 @@ def process(frame,frame_num):
 | Command | #Consumers | Hardware acceleration | Real time |
 | --- | --- | --- | --- |
 | time python3 naive.py | NA | No | 37m22,286s |
+| time python3 producer_consumer.py | 1 | No | 37m36,874s |
 | time python3 producer_consumer.py | 5 | No | 55m59,641s |
