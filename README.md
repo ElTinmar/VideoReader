@@ -130,7 +130,7 @@ if __name__ == "__main__":
 
 Execution times were collected using:
 
-
+| --- | --- |
 | time python3 naive.py | real 6m47,355s |
 | time python3 producer_consumer.py | real 3m23,020s |
 
