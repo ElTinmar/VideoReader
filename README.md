@@ -205,4 +205,21 @@ def busy_wait(dt):
 
 * Using SVD as a synthetic load (CPU intensive and already optimized for multicore processing)
 
+Make sure that numpy is using a multi-threaded BLAS library such as openBLAS. On ubuntu
 
+```
+sudo apt install libopenblas-base libopenblas-dev
+```
+
+should do the trick.  
+
+```
+import numpy as np
+
+frame32 = np.float32(frame)                                                 
+u, s, vh = np.linalg.svd(frame32)
+```
+
+| Command | Processing time per frame | #Consumers | Hardware acceleration | Real time |
+| --- | --- | --- | --- | --- |
+| time python3 naive.py | 100 ms | NA | No | 6m42,774s |
