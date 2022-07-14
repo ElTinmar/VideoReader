@@ -1,6 +1,10 @@
 # Optimize machine vision processing of video files
 
-download test video 
+Using a multiprocessed producer-consumer scheme instead of the naive sequential read-process approach can yield significant improvements 
+in overall speed if the processing task is long. For shorter processing tasks, the overhead introduced by the multiprocessing approach 
+results in no benefits or even worse performance than the sequential approach
+
+* download test video 
 
 ```
 $ sudo pip install youtube-dl
@@ -134,10 +138,11 @@ Intel® HD Graphics 2000
 
 Execution times were collected using:
 
-| Command | #Consumers | Hardware acceleration | Real time |
-| --- | --- | --- | --- |
-| time python3 naive.py | NA | No | 6m47,355s |
-| time python3 producer_consumer.py | 1 | No | 3m23,020s |
-| time python3 producer_consumer.py | 2 | No | 3m23,020s |
-| time python3 producer_consumer.py | 3 | No | 2m15,463s |
+| Command | Processing time per frame | #Consumers | Hardware acceleration | Real time |
+| --- | --- | --- | --- | --- |
+| time python3 naive.py | 100 ms | NA | No | 6m47,355s |
+| time python3 producer_consumer.py | 100 ms | 1 | No | 6m46,246s |
+| time python3 producer_consumer.py | 100 ms | 2 | No | 3m23,020s |
+| time python3 producer_consumer.py | 100 ms | 3 | No | 2m15,463s |
+| time python3 producer_consumer.py | 100 ms | 4 | No | 1m41,924s |
 
