@@ -1,2 +1,2 @@
-# Optimize non-deep learning processing of video files
+# Optimize machine vision processing of video files
 
