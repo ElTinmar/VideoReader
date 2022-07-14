@@ -7,3 +7,8 @@ $ sudo pip install youtube-dl
 $ youtube-dl --format "best[ext=mp4][protocol=https]" https://www.youtube.com/watch?v=9eiaiVthVrk -o jumanji.mp4
 ```
 
+* Naive processing of images
+
+``` python
+naive.py
+```
