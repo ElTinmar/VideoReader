@@ -177,16 +177,16 @@ Intel® HD Graphics 2000
 | time python3 producer_consumer.py | 100 ms | 4 | No | 1m41,924s |
 | time python3 producer_consumer.py | 100 ms | 5 | No | 1m21,792s |
 | time python3 producer_consumer.py | 100 ms | 10 | No | 0m43,272s |
-| time python3 producer_consumer.py | 100 ms | 15 | No | 0m38,774s |
+| time python3 producer_consumer.py | 100 ms | 15 | No | 0m38,774s :heavy_check_mark: |
 | time python3 producer_consumer.py | 100 ms | 20 | No | 1m9,684s |
 | time python3 naive.py | 10 ms | NA | No | 0m52,553s |
 | time python3 producer_consumer.py | 10 ms | 1 | No | 0m51,554s |
 | time python3 producer_consumer.py | 10 ms | 2 | No | 0m29,503s |
-| time python3 producer_consumer.py | 10 ms | 5 | No | 0m28,546s |
+| time python3 producer_consumer.py | 10 ms | 5 | No | 0m28,546s :heavy_check_mark: |
 | time python3 producer_consumer.py | 10 ms | 10 | No | 0m48,809s |
 | time python3 naive.py | 1 ms | NA | No | 0m19,729s |
 | time python3 producer_consumer.py | 1 ms | 1 | No | 0m24,054s |
-| time python3 producer_consumer.py | 1 ms | 2 | No | 0m22,645s |
+| time python3 producer_consumer.py | 1 ms | 2 | No | 0m22,645s :x: |
 | time python3 producer_consumer.py | 1 ms | 3 | No | 0m26,689s |
 
 
@@ -212,7 +212,7 @@ def process(frame,frame_num):
 | time python3 producer_consumer.py | 100 ms | 1 | No | 6m42,629s |
 | time python3 producer_consumer.py | 100 ms | 2 | No | 3m24,008s |
 | time python3 producer_consumer.py | 100 ms | 5 | No | 1m29,378s |
-| time python3 producer_consumer.py | 100 ms | 10 | No | 0m56,405s |
+| time python3 producer_consumer.py | 100 ms | 10 | No | 0m56,405s :heavy_check_mark: |
 | time python3 producer_consumer.py | 100 ms | 15 | No | 1m11,180s |
 
 ### Using SVD as a synthetic load (CPU intensive, multicore)
