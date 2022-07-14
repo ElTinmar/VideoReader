@@ -8,26 +8,23 @@ use_gpu = False
 if use_gpu:
 	os.environ["OPENCV_FFMPEG_CAPTURE_OPTIONS"]="video_codec;h264_cuvid"
 	
-cap = cv2.VideoCapture("input.avi", cv2.CAP_FFMPEG)
-cv2.namedWindow('Display')
+cap = cv2.VideoCapture("jumanji.mp4", cv2.CAP_FFMPEG)
+frame_num = 0
 
-prev_frame_time = 0
-curr_frame_time = 0
+def process(frame,frame_num):	
+    # simulate long processing
+    time.sleep(0.1)
+    print(frame_num)
+
 while True:
     # Get frames here
     rval, frame = cap.read()
     if not rval:
         break
     
-    # Do image processing here 
-    new_frame_time = time.time()
-    fps = 1/(new_frame_time-prev_frame_time)
-    prev_frame_time = new_frame_time
-    cv2.putText(frame,str(int(fps)), (7, 70), cv2.FONT_HERSHEY_SIMPLEX, 3, (100, 255, 0), 3, cv2.LINE_AA)
-    cv2.imshow('Display',frame)
-    key = cv2.waitKey(1)
-    if key == ord('q'):
-        break
+    frame_gray = cv2.cvtColor(frame,cv2.COLOR_RGB2GRAY)
+    frame_num += 1
+    
+    process(frame_gray,frame_num)
 
 cap.release()
-cv2.destroyAllWindows()
