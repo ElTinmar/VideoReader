@@ -17,7 +17,7 @@ $ sudo pip install youtube-dl
 $ youtube-dl --format "best[ext=mp4][protocol=https]" https://www.youtube.com/watch?v=9eiaiVthVrk -o jumanji.mp4
 ```
 
-* Naive processing of images
+## Naive processing of images
 
 In Matlab
 
@@ -34,7 +34,7 @@ while mov.hasFrame()
 end
 ```
 
-In python
+In Python
 
 ``` python
 import os
@@ -69,7 +69,7 @@ while True:
 cap.release()
 ```
 
-* Multiprocessing producer-consumer scheme
+## Multiprocessing producer-consumer scheme
 
 ``` python
 from multiprocessing import Process, Queue, JoinableQueue
