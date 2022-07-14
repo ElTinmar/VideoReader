@@ -162,3 +162,15 @@ Execution times were collected using:
 | time python3 producer_consumer.py | 1 ms | 2 | No | 0m22,645s |
 | time python3 producer_consumer.py | 1 ms | 3 | No | 0m26,689s |
 
+``` python
+def busy_wait(dt):   
+    current_time = time.time()
+    while (time.time() < current_time+dt):
+        pass
+```
+
+Using busy_wait as a synthetic load (CPU intensive)
+
+| Command | Processing time per frame | #Consumers | Hardware acceleration | Real time |
+| --- | --- | --- | --- | --- |
+| time python3 naive.py | 100 ms | NA | No | 6m47,355s |
