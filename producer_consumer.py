@@ -18,8 +18,9 @@ def producer(path, use_gpu, frame_queue):
         if not grabbed:
             break
                 
+        frame_gray = cv2.cvtColor(frame,cv2.COLOR_RGB2GRAY)        
         frame_num += 1
-        frame_queue.put((frame, frame_num))
+        frame_queue.put((frame_gray, frame_num))
         
     stream.release()
     # Wait until queue is emptied by consumers 
