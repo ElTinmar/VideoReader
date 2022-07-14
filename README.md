@@ -6,8 +6,10 @@ TL/DR
 - Matlab is slow 
 - Using a multiprocessed producer-consumer scheme instead of the naive sequential read-process approach can yield significant improvements 
 in overall speed if the processing task is long and not already multithreaded. 
-- For shorter processing tasks, the overhead introduced by the multiprocessing approach results in no clear benefits or even worse performance than the sequential approach 
-- If the task is already multithreaded (e.g. SVD from openBLAS), there is no clear benefits to using the multiprocessed producer-consumer approah
+- For short processing tasks, the overhead introduced by the multiprocessing approach results in no clear benefits or even worse performance than the sequential approach 
+- If the task is already multithreaded (e.g. SVD from openBLAS), there is no clear benefits to using the multiprocessed producer-consumer approach
+- There is no clear speed gain when using hardware acceleration to decode frames from the video file 
+- Running the consumer processing code on the GPU when possible can yield a significant speed-up 
 ```
 
 * download test video 
