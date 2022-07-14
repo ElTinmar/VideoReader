@@ -13,6 +13,19 @@ $ youtube-dl --format "best[ext=mp4][protocol=https]" https://www.youtube.com/wa
 
 * Naive processing of images
 
+``` matlab
+mov = VideoReader('jumanji.mp4')
+num_frame = 0
+while mov.hasFrame()
+    frame = mov.readFrame()
+    frame_gray = frame(:,:,1)
+    num_frame = num_frame+1
+    
+    pause(0.1);
+    disp(frame_num)
+end
+```
+
 ``` python
 import os
 import cv2
@@ -173,4 +186,5 @@ Using busy_wait as a synthetic load (CPU intensive)
 
 | Command | Processing time per frame | #Consumers | Hardware acceleration | Real time |
 | --- | --- | --- | --- | --- |
-| time python3 naive.py | 100 ms | NA | No | 6m47,355s |
+| time python3 naive.py | 100 ms | NA | No | 6m42,774s |
+| time python3 producer_consumer.py | 100 ms | 1 | No | 6m46,246s |
