@@ -229,6 +229,6 @@ def process(frame,frame_num):
     print(frame_num)
 ```
 
-| Command | Processing time per frame | #Consumers | Hardware acceleration | Real time |
-| --- | --- | --- | --- | --- |
-| time python3 naive.py | 100 ms | NA | No | 6m42,774s |
+| Command | #Consumers | Hardware acceleration | Real time |
+| --- | --- | --- | --- |
+| time python3 naive.py | NA | No | 6m42,774s |
