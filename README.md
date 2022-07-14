@@ -162,7 +162,7 @@ Intel® HD Graphics 2000
 
 * Using time.sleep as a synthetic load (not CPU intensive)
 
-| Command | Processing time per frame | #Consumers | Hardware acceleration | Real time |
+| Command | Wait duration | #Consumers | Hardware acceleration | Real time |
 | --- | --- | --- | --- | --- |
 | matlab -nodesktop -r "tic; run('naive.m'); toc; exit;" | 100 ms | NA | No | 7m06,613s |
 | time python3 naive.py | 100 ms | NA | No | 6m47,355s |
@@ -201,7 +201,7 @@ def process(frame,frame_num):
 ```
 
 
-| Command | Processing time per frame | #Consumers | Hardware acceleration | Real time |
+| Command | Wait duration | #Consumers | Hardware acceleration | Real time |
 | --- | --- | --- | --- | --- |
 | time python3 naive.py | 100 ms | NA | No | 6m42,774s |
 | time python3 producer_consumer.py | 100 ms | 1 | No | 6m42,629s |
