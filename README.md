@@ -185,9 +185,9 @@ Intel® HD Graphics 2000
 | time python3 producer_consumer.py | 10 ms | 5 | No | 0m28,546s :heavy_check_mark: |
 | time python3 producer_consumer.py | 10 ms | 10 | No | 0m48,809s |
 | time python3 naive.py | 1 ms | NA | No | 0m19,729s |
-| time python3 producer_consumer.py | 1 ms | 1 | No | 0m24,054s |
-| time python3 producer_consumer.py | 1 ms | 2 | No | 0m22,645s :x: |
-| time python3 producer_consumer.py | 1 ms | 3 | No | 0m26,689s |
+| time python3 producer_consumer.py | 1 ms | 1 | No | 0m24,054s :skull: |
+| time python3 producer_consumer.py | 1 ms | 2 | No | 0m22,645s :skull: |
+| time python3 producer_consumer.py | 1 ms | 3 | No | 0m26,689s :skull: |
 
 
 ### Using busy_wait as a synthetic load (CPU intensive, single core)
@@ -208,7 +208,7 @@ def process(frame,frame_num):
 
 | Command | Wait duration | #Consumers | Hardware acceleration | Real time |
 | --- | --- | --- | --- | --- |
-| time python3 naive.py | 100 ms | NA | No | 6m42,774s |
+| time python3 naive.py | 100 ms | NA | No | 6m42,774s :skull: |
 | time python3 producer_consumer.py | 100 ms | 1 | No | 6m42,629s |
 | time python3 producer_consumer.py | 100 ms | 2 | No | 3m24,008s |
 | time python3 producer_consumer.py | 100 ms | 5 | No | 1m29,378s |
@@ -238,4 +238,4 @@ def process(frame,frame_num):
 | --- | --- | --- | --- |
 | time python3 naive.py | NA | No | 37m22,286s |
 | time python3 producer_consumer.py | 1 | No | 37m36,874s |
-| time python3 producer_consumer.py | 5 | No | 55m59,641s |
+| time python3 producer_consumer.py | 5 | No | 55m59,641s :skull: |
