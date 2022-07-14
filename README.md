@@ -133,7 +133,7 @@ if __name__ == "__main__":
 * Results
 
 Hardware:
-Intel(R) Core(TM) i5-2500S CPU @ 2.70GHz (4 cores, 4 threads)
+Intel(R) Core(TM) i5-2500S CPU @ 2.70GHz (4 cores, 4 threads)  
 Intel® HD Graphics 2000
 
 Execution times were collected using:
