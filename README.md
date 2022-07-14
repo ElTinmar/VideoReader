@@ -188,7 +188,7 @@ Execution times were collected using:
 
 
 * Using busy_wait as a synthetic load (CPU intensive, single core)
-* 
+
 ``` python
 def busy_wait(dt):   
     current_time = time.time()
