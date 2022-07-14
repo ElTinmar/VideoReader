@@ -13,6 +13,8 @@ $ youtube-dl --format "best[ext=mp4][protocol=https]" https://www.youtube.com/wa
 
 * Naive processing of images
 
+In Matlab
+
 ``` matlab
 mov = VideoReader('jumanji.mp4')
 num_frame = 0
@@ -25,6 +27,8 @@ while mov.hasFrame()
     disp(frame_num)
 end
 ```
+
+In python
 
 ``` python
 import os
