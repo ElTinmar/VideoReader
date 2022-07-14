@@ -245,13 +245,13 @@ Hardware:
 NVIDIA GeForce RTX 2080 Ti  
 64GB (4x16GB) DDR4 2933 MHz  
 
-| Command | Method | Wait duration | #Consumers | Hardware acceleration | Real time |
-| --- | --- | --- | --- | --- | --- |
-| time python3 naive.py | time.sleep | 100 ms | NA | No | 6m48,654s |
-| time python3 producer_consumer.py | time.sleep | 100 ms | 15 | No | 0m28,396s |
-| time python3 producer_consumer.py | time.sleep | 100 ms | 30 | No | 0m15,574s |
-| time python3 producer_consumer.py | time.sleep | 100 ms | 60 | No | 0m13,529s |
-| time python3 producer_consumer.py | time.sleep | 100 ms | 100 | No | 2m9,737s |
-| time python3 naive.py | SVD | NA | NA | No | x|
-| time python3 producer_consumer.py | SVD | NA | 1 | No | x |
-| time python3 producer_consumer.py | SVD | NA | 2 | No | 5m45,433s |
+| Command | Method | Wait duration | #Consumers | Hardware acceleration | Real time | Comments |
+| --- | --- | --- | --- | --- | --- | --- |
+| time python3 naive.py | time.sleep | 100 ms | NA | No | 6m48,654s | |
+| time python3 producer_consumer.py | time.sleep | 100 ms | 15 | No | 0m28,396s | |
+| time python3 producer_consumer.py | time.sleep | 100 ms | 30 | No | 0m15,574s | |
+| time python3 producer_consumer.py | time.sleep | 100 ms | 60 | No | 0m13,529s | |
+| time python3 producer_consumer.py | time.sleep | 100 ms | 100 | No | 2m9,737s | |
+| time python3 naive.py | SVD | NA | NA | No | 9m21,224s | openBLAS is using 36 cores |
+| time python3 producer_consumer.py | SVD | NA | 1 | No | x | |
+| time python3 producer_consumer.py | SVD | NA | 2 | No | 5m45,433s | |
