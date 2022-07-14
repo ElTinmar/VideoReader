@@ -1,8 +1,10 @@
 # Optimize machine vision processing of video files
 
-Using a multiprocessed producer-consumer scheme instead of the naive sequential read-process approach can yield significant improvements 
-in overall speed if the processing task is long. For shorter processing tasks, the overhead introduced by the multiprocessing approach 
-results in no benefits or even worse performance than the sequential approach
+TL/DR
+- Matlab is slow 
+- Using a multiprocessed producer-consumer scheme instead of the naive sequential read-process approach can yield significant improvements 
+in overall speed if the processing task is long. 
+- For shorter processing tasks, the overhead introduced by the multiprocessing approach results in no clear benefits or even worse performance than the sequential approach  
 
 * download test video 
 
@@ -16,15 +18,15 @@ $ youtube-dl --format "best[ext=mp4][protocol=https]" https://www.youtube.com/wa
 In Matlab
 
 ``` matlab
-mov = VideoReader('jumanji.mp4')
-num_frame = 0
+mov = VideoReader('jumanji.mp4');
+num_frame = 0;
 while mov.hasFrame()
-    frame = mov.readFrame()
-    frame_gray = frame(:,:,1)
-    num_frame = num_frame+1
+    frame = mov.readFrame();
+    frame_gray = frame(:,:,1);
+    num_frame = num_frame+1;
     
     pause(0.1);
-    disp(frame_num)
+    disp(num_frame);
 end
 ```
 
@@ -147,9 +149,9 @@ if __name__ == "__main__":
     start(frame_queue, result_queue, videofile, n_consumers, use_gpu=False)
 ```
 
-* Results
+## Results
 
-Using time.sleep as a synthetic load (not CPU intensive)
+* Using time.sleep as a synthetic load (not CPU intensive)
 
 Hardware:
 Intel(R) Core(TM) i5-2500S CPU @ 2.70GHz (4 cores, 4 threads)  
@@ -160,6 +162,7 @@ Execution times were collected using:
 
 | Command | Processing time per frame | #Consumers | Hardware acceleration | Real time |
 | --- | --- | --- | --- | --- |
+| matlab -nodesktop -r "tic; run('naive.m'); toc; exit;" | 100 ms | NA | No | 7m06,613s |
 | time python3 naive.py | 100 ms | NA | No | 6m47,355s |
 | time python3 producer_consumer.py | 100 ms | 1 | No | 6m46,246s |
 | time python3 producer_consumer.py | 100 ms | 2 | No | 3m23,020s |
@@ -186,9 +189,17 @@ def busy_wait(dt):
         pass
 ```
 
-Using busy_wait as a synthetic load (CPU intensive)
+* Using busy_wait as a synthetic load (CPU intensive)
 
 | Command | Processing time per frame | #Consumers | Hardware acceleration | Real time |
 | --- | --- | --- | --- | --- |
 | time python3 naive.py | 100 ms | NA | No | 6m42,774s |
-| time python3 producer_consumer.py | 100 ms | 1 | No | 6m46,246s |
+| time python3 producer_consumer.py | 100 ms | 1 | No | 6m42,629s |
+| time python3 producer_consumer.py | 100 ms | 2 | No | 3m24,008s |
+| time python3 producer_consumer.py | 100 ms | 5 | No | 1m29,378s |
+| time python3 producer_consumer.py | 100 ms | 10 | No | 0m56,405s |
+| time python3 producer_consumer.py | 100 ms | 15 | No | 1m11,180s |
+
+* Using SVD as a synthetic load (CPU intensive and already optimized for multicore processing)
+
+
