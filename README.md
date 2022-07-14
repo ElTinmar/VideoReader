@@ -128,6 +128,8 @@ if __name__ == "__main__":
 
 * Results
 
+Execution times were collected using:
+
 ```
 time python3 naive.py
 time python3 producer_consumer.py
