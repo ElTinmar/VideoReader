@@ -64,7 +64,9 @@ def start(frame_queue, result_queue, videofile, n_consumers=1, use_gpu=False):
 def process(frame,frame_num,frame_queue,result_queue):
     """actual image processing code goes here"""
     
-    #print((frame_queue.qsize(), frame_num))
+    # simulate long processing task
+    time.sleep(0.1)
+    print((frame_queue.qsize(), frame_num))
 
 if __name__ == "__main__":
     
