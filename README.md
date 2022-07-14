@@ -7,7 +7,7 @@ TL/DR
 - Using a multiprocessed producer-consumer scheme instead of the naive sequential read-process approach can yield significant improvements 
 in overall speed if the processing task is long. 
 - For shorter processing tasks, the overhead introduced by the multiprocessing approach results in no clear benefits or even worse performance than the sequential approach 
-- If the task is already multithreaded (ex. SVD from openBLAS), CONCLUSION
+- If the task is already multithreaded (e.g. SVD from openBLAS), CONCLUSION
 ```
 
 * download test video 
