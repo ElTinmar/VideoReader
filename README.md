@@ -128,10 +128,16 @@ if __name__ == "__main__":
 
 * Results
 
+Hardware:
+Intel(R) Core(TM) i5-2500S CPU @ 2.70GHz (4 cores, 4 threads)
+Intel® HD Graphics 2000
+
 Execution times were collected using:
 
-| Command | Real time |
-| --- | --- |
-| time python3 naive.py | real 6m47,355s |
-| time python3 producer_consumer.py | real 3m23,020s |
+| Command | #Consumers | Hardware acceleration | Real time |
+| --- | --- | --- | --- |
+| time python3 naive.py | NA | No | 6m47,355s |
+| time python3 producer_consumer.py | 1 | No | 3m23,020s |
+| time python3 producer_consumer.py | 2 | No | 3m23,020s |
+| time python3 producer_consumer.py | 3 | No | 2m15,463s |
 
