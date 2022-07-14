@@ -12,7 +12,7 @@ in overall speed if the processing task is long and not already multithreaded.
 - Running the consumer processing code on the GPU when possible can yield a significant speed-up 
 ```
 
-* download test video 
+## download test video 
 
 ```
 $ sudo pip install youtube-dl
