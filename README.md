@@ -214,11 +214,15 @@ sudo apt install libopenblas-base libopenblas-dev
 
 should do the trick.  
 
-```
+``` python
 import numpy as np
 
-frame32 = np.float32(frame)                                                 
-u, s, vh = np.linalg.svd(frame32)
+def process(frame,frame_num):
+    """actual image processing code goes here"""
+    
+    frame32 = np.float32(frame)                                                 
+    u, s, vh = np.linalg.svd(frame32)
+    print(frame_num)
 ```
 
 | Command | Processing time per frame | #Consumers | Hardware acceleration | Real time |
