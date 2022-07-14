@@ -245,3 +245,8 @@ Hardware:
 NVIDIA GeForce RTX 2080 Ti  
 64GB (4x16GB) DDR4 2933 MHz  
 
+| Command | Method | Wait duration | #Consumers | Hardware acceleration | Real time |
+| --- | --- | --- | --- | --- | --- |
+| time python3 naive.py | time.sleep | 100 ms | NA | No | 6m48,654s |
+| time python3 producer_consumer.py | time.sleep | 100 ms | 15 | No | 0m28,396s |
+| time python3 producer_consumer.py | time.sleep | 100 ms | 100 | No | 2m9,737s |
