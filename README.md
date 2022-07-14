@@ -10,5 +10,5 @@ $ youtube-dl --format "best[ext=mp4][protocol=https]" https://www.youtube.com/wa
 * Naive processing of images
 
 ``` python
-naive.py
+# naive.py
 ```
