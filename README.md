@@ -191,6 +191,12 @@ def busy_wait(dt):
     current_time = time.time()
     while (time.time() < current_time+dt):
         pass
+
+def process(frame,frame_num):
+    """actual image processing code goes here"""
+    
+    busy_wait(0.1)
+    print(frame_num)
 ```
 
 * Using busy_wait as a synthetic load (CPU intensive)
