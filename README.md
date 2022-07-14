@@ -10,6 +10,11 @@ in overall speed if the processing task is long and not already multithreaded.
 - There is no clear speed gain when using hardware acceleration to decode frames from the video file 
 - Running the consumer processing code on the GPU when possible can yield a significant speed-up 
 
+General advice
+
+- Keep an eye on `top` or `htop` to see if all cores are in use
+- Keep an eye on the size of the producer queue 
+
 ## download test video 
 
 ```
