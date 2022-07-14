@@ -132,9 +132,12 @@ if __name__ == "__main__":
 
 * Results
 
+Using time.sleep as a synthetic load (not CPU intensive)
+
 Hardware:
 Intel(R) Core(TM) i5-2500S CPU @ 2.70GHz (4 cores, 4 threads)  
-Intel® HD Graphics 2000
+Intel® HD Graphics 2000  
+12 GB of 1333 MHz DDR3  
 
 Execution times were collected using:
 
@@ -149,5 +152,13 @@ Execution times were collected using:
 | time python3 producer_consumer.py | 100 ms | 10 | No | 0m43,272s |
 | time python3 producer_consumer.py | 100 ms | 15 | No | 0m38,774s |
 | time python3 producer_consumer.py | 100 ms | 20 | No | 1m9,684s |
-
+| time python3 naive.py | 10 ms | NA | No | 0m52,553s |
+| time python3 producer_consumer.py | 10 ms | 1 | No | 0m51,554s |
+| time python3 producer_consumer.py | 10 ms | 2 | No | 0m29,503s |
+| time python3 producer_consumer.py | 10 ms | 5 | No | 0m28,546s |
+| time python3 producer_consumer.py | 10 ms | 10 | No | 0m48,809s |
+| time python3 naive.py | 1 ms | NA | No | 0m19,729s |
+| time python3 producer_consumer.py | 1 ms | 1 | No | 0m24,054s |
+| time python3 producer_consumer.py | 1 ms | 2 | No | 0m22,645s |
+| time python3 producer_consumer.py | 1 ms | 3 | No | 0m26,689s |
 
