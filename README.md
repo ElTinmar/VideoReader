@@ -252,3 +252,6 @@ NVIDIA GeForce RTX 2080 Ti
 | time python3 producer_consumer.py | time.sleep | 100 ms | 30 | No | 0m15,574s |
 | time python3 producer_consumer.py | time.sleep | 100 ms | 60 | No | 0m13,529s |
 | time python3 producer_consumer.py | time.sleep | 100 ms | 100 | No | 2m9,737s |
+| time python3 naive.py | SVD | NA | NA | No | x|
+| time python3 producer_consumer.py | SVD | NA | 1 | No | x |
+| time python3 producer_consumer.py | SVD | NA | 2 | No | 5m45,433s |
