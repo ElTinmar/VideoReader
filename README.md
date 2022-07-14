@@ -162,7 +162,7 @@ Intel(R) Core(TM) i5-2500S CPU @ 2.70GHz (4 cores, 4 threads)
 Intel® HD Graphics 2000   
 12 GB of 1333 MHz DDR3   
 
-* Using time.sleep as a synthetic load (not CPU intensive)
+1. Using time.sleep as a synthetic load (not CPU intensive)
 
 | Command | Wait duration | #Consumers | Hardware acceleration | Real time |
 | --- | --- | --- | --- | --- |
@@ -187,7 +187,7 @@ Intel® HD Graphics 2000
 | time python3 producer_consumer.py | 1 ms | 3 | No | 0m26,689s |
 
 
-* Using busy_wait as a synthetic load (CPU intensive, single core)
+2. Using busy_wait as a synthetic load (CPU intensive, single core)
 
 ``` python
 def busy_wait(dt):   
@@ -212,7 +212,7 @@ def process(frame,frame_num):
 | time python3 producer_consumer.py | 100 ms | 10 | No | 0m56,405s |
 | time python3 producer_consumer.py | 100 ms | 15 | No | 1m11,180s |
 
-* Using SVD as a synthetic load (CPU intensive, multicore)
+3. Using SVD as a synthetic load (CPU intensive, multicore)
 
 Make sure that numpy is using a multi-threaded BLAS library such as openBLAS. On ubuntu
 
