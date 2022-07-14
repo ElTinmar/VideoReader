@@ -155,12 +155,12 @@ if __name__ == "__main__":
 
 ## Results
 
-* Using time.sleep as a synthetic load (not CPU intensive)
-
 Hardware:
 Intel(R) Core(TM) i5-2500S CPU @ 2.70GHz (4 cores, 4 threads)  
 Intel® HD Graphics 2000  
 12 GB of 1333 MHz DDR3  
+
+* Using time.sleep as a synthetic load (not CPU intensive)
 
 Execution times were collected using:
 
