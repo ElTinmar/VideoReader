@@ -123,7 +123,7 @@ if __name__ == "__main__":
     videofile = '/home/martin/jumanji.mp4'
     n_consumers = 1
 
-    start(frame_queue, result_queue, videofile, n_consumers, use_gpu=True)
+    start(frame_queue, result_queue, videofile, n_consumers, use_gpu=False)
 ```
 
 * Results
