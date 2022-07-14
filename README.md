@@ -186,6 +186,9 @@ Execution times were collected using:
 | time python3 producer_consumer.py | 1 ms | 2 | No | 0m22,645s |
 | time python3 producer_consumer.py | 1 ms | 3 | No | 0m26,689s |
 
+
+* Using busy_wait as a synthetic load (CPU intensive, single core)
+* 
 ``` python
 def busy_wait(dt):   
     current_time = time.time()
@@ -199,7 +202,6 @@ def process(frame,frame_num):
     print(frame_num)
 ```
 
-* Using busy_wait as a synthetic load (CPU intensive)
 
 | Command | Processing time per frame | #Consumers | Hardware acceleration | Real time |
 | --- | --- | --- | --- | --- |
@@ -210,15 +212,13 @@ def process(frame,frame_num):
 | time python3 producer_consumer.py | 100 ms | 10 | No | 0m56,405s |
 | time python3 producer_consumer.py | 100 ms | 15 | No | 1m11,180s |
 
-* Using SVD as a synthetic load (CPU intensive and already optimized for multicore processing)
+* Using SVD as a synthetic load (CPU intensive, multicore)
 
 Make sure that numpy is using a multi-threaded BLAS library such as openBLAS. On ubuntu
 
 ```
 sudo apt install libopenblas-base libopenblas-dev
 ```
-
-should do the trick.  
 
 ``` python
 import numpy as np
