@@ -239,3 +239,9 @@ def process(frame,frame_num):
 | time python3 naive.py | NA | No | 37m22,286s |
 | time python3 producer_consumer.py | 1 | No | 37m36,874s |
 | time python3 producer_consumer.py | 5 | No | 55m59,641s :skull: |
+
+Hardware:  
+2x Intel(R) Xeon(R) Gold 5220 CPU @ 2.20GHz (36 cores, 72 threads)
+NVIDIA GeForce RTX 2080 Ti
+64GB (4x16GB) DDR4 2933 MHz
+
