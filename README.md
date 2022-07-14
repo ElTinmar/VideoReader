@@ -8,7 +8,7 @@ in overall speed if the processing task is long and not already multithreaded.
 - For short processing tasks, the overhead introduced by the multiprocessing approach results in no clear benefits or even worse performance than the sequential approach 
 - If the task is already multithreaded (e.g. SVD from openBLAS), using several consumer thread processes can be worse
 - If the task is already multithreaded (e.g. SVD from openBLAS), reducing OMP_NUM_THREADS (controls the number of parrallel threads for openBLAS) and increasing the number of consumers may increase performance
-- There is no clear speed gain when using hardware acceleration to decode frames from the video file 
+- There is no clear speed gain when using hardware acceleration to decode frames from the video file (TODO RE-TEST)
 - TO TEST Running the consumer processing code on the GPU when possible can yield a significant speed-up 
 
 General advice
