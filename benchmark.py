@@ -14,7 +14,7 @@ for omp in range(1,17):
         start = time.time()
         if gpu:
             subprocess.run(
-                ['./naive.py','../jumanji_short.mp4'],
+                ['./naive.py','../jumanji_short.mp4','--gpu'],
                 env=my_env,
                 capture_output=True
             )
@@ -23,7 +23,7 @@ for omp in range(1,17):
             print('OMP_NUM_THREADS=' + str(omp) + ' ./naive.py ../jumanji_short.mp4 --gpu : ' + str(duration))
         else:
             subprocess.run(
-                ['./naive.py','../jumanji_short.mp4','--gpu'],
+                ['./naive.py','../jumanji_short.mp4'],
                 env=my_env,
                 capture_output=True
             ) 
