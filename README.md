@@ -268,6 +268,17 @@ NVIDIA GeForce RTX 2080 Ti
 | OMP_NUM_THREADS=5 time python3 producer_consumer.py | SVD | NA | 10 | No | 1m37,042s | |
 | OMP_NUM_THREADS=5 time python3 producer_consumer.py | SVD | NA | 12 | No | 1m31,409s | |
 
+
+Hardware:                                                                       
+2x Intel(R) Xeon(R) CPU X5667 @3.07GHz (8 cores, 16 threads)         
+NVIDIA GeForce RTX 3050                                                      
+96GB (4x16GB + 8x4GB) DDR3 1333 MHz
+
+| Command | Method | Wait duration | #Consumers | Hardware acceleration | Real time | Comments |
+ 24 | --- | --- | --- | --- | --- | --- | --- |
+ | OMP_NUM_THREADS=2 time python3 producer_consumer.py | SVD | NA | 6 | No | 15m4,216s |  |
+ | OMP_NUM_THREADS=2 time python3 producer_consumer.py | SVD | NA | 6 | Yes | 15m4,216s |  |
+
 # Cool stuff
 
 deeplabcut/utils/auxfun_videos.py
