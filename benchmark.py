@@ -48,7 +48,7 @@ for n_consumers in range(1,17):
                 )
                 stop = time.time()
                 duration = stop-start
-                print('OMP_NUM_THREADS=' + str(omp) + ' ./producer_consumer.py ../jumanji_short.mp4 -n ' + str(n_consumers) + '--gpu : ' + str(duration))
+                print('OMP_NUM_THREADS=' + str(omp) + ' ./producer_consumer.py ../jumanji_short.mp4 -n ' + str(n_consumers) + ' --gpu : ' + str(duration))
             else:
                 subprocess.run(
                     ['./producer_consumer.py', 
