@@ -12,6 +12,7 @@ in overall speed if the processing task is long and not already multithreaded.
 full quickly, there may be an initial speed up, but the producer won't be using many CPU cycles anyway
 - TO TEST Running the consumer processing code on the GPU when possible can yield a significant speed-up 
 - TO TEST You may need parallel producers (read several video chunks at the same time) if you are doing some very light processing (e.g. just counting the number of frames)
+- TO TEST Hyperthreading ? On hyperthreaded processors, it looks like peak performance is reached for OMP_NUM_THREADS = num physical cores. Popular wisdom tends to advise against hyperthreading
 
 General advice
 
