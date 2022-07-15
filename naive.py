@@ -81,6 +81,9 @@ while True:
     frame_gray = cv2.cvtColor(frame,cv2.COLOR_RGB2GRAY)
     frame_num += 1
     
-    pfun(frame_gray,frame_num)
+    try:
+        pfun(frame_gray,frame_num)
+    except KeyboardInterrupt:
+        break
 
 cap.release()
