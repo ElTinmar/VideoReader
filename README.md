@@ -277,7 +277,7 @@ NVIDIA GeForce RTX 3050
 | Command | Method | Wait duration | #Consumers | Hardware acceleration | Real time | Comments |
 | --- | --- | --- | --- | --- | --- | --- |
 | OMP_NUM_THREADS=2 time python3 producer_consumer.py | SVD | NA | 6 | No | 15m4,216s |  |
-| OMP_NUM_THREADS=2 time python3 producer_consumer.py | SVD | NA | 6 | Yes | 15m4,216s |  |
+| OMP_NUM_THREADS=2 time python3 producer_consumer.py | SVD | NA | 6 | Yes | 15m10,400s |  |
 
 # Cool stuff
 
