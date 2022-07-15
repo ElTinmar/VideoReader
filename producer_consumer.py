@@ -3,6 +3,7 @@ import cv2
 import time
 import os
 import queue
+import numpy
 
 def producer(path, use_gpu, frame_queue):
     """get images from file and put them in a queue"""
@@ -60,12 +61,25 @@ def start(frame_queue, result_queue, videofile, n_consumers=1, use_gpu=False):
 
     # wait for producers to terminate                             
     producer_process.join()
+   
+def busy_wait(dt):   
+    current_time = time.time()
+    while (time.time() < current_time+dt):
+        pass    
 
 def process(frame,frame_num,frame_queue,result_queue):
     """actual image processing code goes here"""
     
-    # simulate long processing task
-    time.sleep(0.1)
+    # not CPU intensive
+    time.sleep(0.1) 
+    
+    # CPU intensive single core
+    busy_wait(0.1) 
+   
+    # CPU intensive multithreaded (tune with OMP_NUM_THREADS) 
+    frame32 = np.float32(frame)                                                 
+    u, s, vh = np.linalg.svd(frame32)
+    
     print((frame_queue.qsize(), frame_num))
 
 if __name__ == "__main__":
