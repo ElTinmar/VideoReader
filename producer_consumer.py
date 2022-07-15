@@ -4,6 +4,7 @@ import time
 import os
 import queue
 import numpy
+import argparse
 
 def producer(path, use_gpu, frame_queue):
     """get images from file and put them in a queue"""
