@@ -80,6 +80,7 @@ def synthetic_load_multi_core(frame,frame_num,frame_queue,result_queue):
      # CPU intensive multithreaded (tune with OMP_NUM_THREADS) 
     frame32 = np.float32(frame)                                                 
     u, s, vh = np.linalg.svd(frame32)
+    print((frame_queue.qsize(), frame_num))
     
 def process(frame,frame_num,frame_queue,result_queue):
     """actual image processing code goes here"""
