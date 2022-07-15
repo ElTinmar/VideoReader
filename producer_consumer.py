@@ -42,7 +42,7 @@ def consumer(frame_queue, result_queue, process_num, process_fun):
         except queue.Empty:
             pass
         
-def start(frame_queue, result_queue, videofile, n_consumers=1, use_gpu=False):
+def start(frame_queue, result_queue, videofile, n_consumers=1, use_gpu=False, process_fun=process):
     """spawn all the processes"""
 
     # start consumers and producers                                             
@@ -67,19 +67,21 @@ def busy_wait(dt):
     while (time.time() < current_time+dt):
         pass    
 
-def process(frame,frame_num,frame_queue,result_queue):
-    """actual image processing code goes here"""
-    
-    # not CPU intensive
+def synthetic_load_light(frame,frame_num,frame_queue,result_queue):
     time.sleep(0.1) 
+    print((frame_queue.qsize(), frame_num))
     
-    # CPU intensive single core
+def synthetic_load_single_core(frame,frame_num,frame_queue,result_queue):
     busy_wait(0.1) 
-   
-    # CPU intensive multithreaded (tune with OMP_NUM_THREADS) 
+    print((frame_queue.qsize(), frame_num))
+
+def synthetic_load_multi_core(frame,frame_num,frame_queue,result_queue):
+     # CPU intensive multithreaded (tune with OMP_NUM_THREADS) 
     frame32 = np.float32(frame)                                                 
     u, s, vh = np.linalg.svd(frame32)
     
+def process(frame,frame_num,frame_queue,result_queue):
+    """actual image processing code goes here"""
     print((frame_queue.qsize(), frame_num))
 
 if __name__ == "__main__":
@@ -90,4 +92,11 @@ if __name__ == "__main__":
     videofile = '/home/martin/jumanji.mp4'
     n_consumers = 1
 
-    start(frame_queue, result_queue, videofile, n_consumers, use_gpu=True)
+    start(
+        frame_queue, 
+        result_queue, 
+        videofile, 
+        n_consumers, 
+        use_gpu=True, 
+        process_fun=synthetic_load_multi_core
+    )
