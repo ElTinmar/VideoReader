@@ -2,7 +2,8 @@
 
 TL/DR
 
-- Matlab is slow 
+- Matlab VideoReader is slowish but not that bad
+- Using single vs double precision images may be faster
 - Using a multiprocessed producer-consumer scheme instead of the naive sequential read-process approach can yield significant improvements 
 in overall speed if the processing task is long and not already multithreaded. 
 - For short processing tasks, the overhead introduced by the multiprocessing approach results in no clear benefits or even worse performance than the sequential approach 
@@ -825,6 +826,9 @@ OMP_NUM_THREADS=15 ./producer_consumer.py ../jumanji_short.mp4 -n 16--gpu : 69.1
 OMP_NUM_THREADS=15./producer_consumer.py ../jumanji_short.mp4 -n 16 : 68.39567422866821
 OMP_NUM_THREADS=16 ./producer_consumer.py ../jumanji_short.mp4 -n 16--gpu : 73.04822206497192
 OMP_NUM_THREADS=16./producer_consumer.py ../jumanji_short.mp4 -n 16 : 71.55102372169495
+
+
+tic; naive('../jumanji_short.mp4'); toc : 29s
 
 # Cool stuff
 
