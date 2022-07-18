@@ -1,4 +1,6 @@
-function naive(videofile)
+function naive(videofile,num_threads)
+
+    maxNumCompThreads(num_threads);
 
     function process(frame, frame_num)
         frame_double = im2double(frame);
