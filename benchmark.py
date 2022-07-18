@@ -9,6 +9,22 @@ my_env = os.environ.copy()
 videofile = '../jumanji_short.mp4'
 
 for omp in range(1,17):
+    
+    # MATLAB naive
+    start = time.time()
+    subprocess.run(
+         ['matlab',
+         '-nodesktop',
+         '-nosplash',
+         '-r',
+         "naive('../jumanji_short.mp4'," + str(omp) + "); exit"],
+         capture_output=True
+    )
+    stop = time.time()
+    duration = (stop-start)                                             
+    print("naive('../jumanji_short.mp4'," + str(omp) + "); exit : " + str(duration))
+
+    # Python naive 
     for gpu in [True, False]:
         my_env['OMP_NUM_THREADS'] = str(omp)
         start = time.time()
