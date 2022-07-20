@@ -11,6 +11,9 @@ def busy_wait(dt):
     while (time.time() < current_time+dt):
         pass
 
+def do_nothing(frame,frame_num):
+    pass
+
 def synthetic_load_light(frame,frame_num):
     time.sleep(0.1) 
     print(frame_num)
@@ -62,6 +65,8 @@ elif (args.load == "SC"):
     pfun = synthetic_load_single_core
 elif (args.load == "L"):
     pfun = synthetic_load_light
+elif (args.load == "N"):
+    pfun = do_nothing
 else:
     raise ValueError
 
@@ -71,19 +76,25 @@ if use_gpu:
 	
 cap = cv2.VideoCapture(videofile, cv2.CAP_FFMPEG)
 frame_num = 0
+duration = 0
 
+start = time.time()
 while True:
     # Get frames here
     rval, frame = cap.read()
     if not rval:
         break
     
-    frame_gray = cv2.cvtColor(frame,cv2.COLOR_RGB2GRAY)
+    #frame_gray = cv2.cvtColor(frame,cv2.COLOR_RGB2GRAY)
     frame_num += 1
     
     try:
-        pfun(frame_gray,frame_num)
+        pfun(frame,frame_num)
     except KeyboardInterrupt:
         break
+stop = time.time()
+duration = stop - start
+fps = frame_num/duration
+print("num frames : " + str(frame_num) + ", duration : " + str(duration) + ", FPS : " + str(fps))
 
 cap.release()
