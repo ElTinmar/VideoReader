@@ -131,15 +131,17 @@ int main(int argc, char** argv)
     size_t   data_size;
     int ret;
     int eof;
+    int num_threads = 1;
     AVPacket* pkt;
 
-    if (argc <= 2) {
-        fprintf(stderr, "Usage: %s <input file> <codec>\n", argv[0]);
+    if (argc <= 3) {
+        fprintf(stderr, "Usage: %s <input file> <codec> num_threads\n", argv[0]);
         exit(0);
     }
     filename    = argv[1];
     codecname   = argv[2];
-
+    num_threads = atoi(argv[3]);
+ 
     pkt = av_packet_alloc();
     if (!pkt)
         exit(1);
@@ -166,6 +168,8 @@ int main(int argc, char** argv)
         exit(1);
     }
 
+    c->thread_count = num_threads;
+    
     if (avcodec_open2(c, codec, NULL) < 0) {
         fprintf(stderr, "Could not open codec\n");
         exit(1);
