@@ -133,6 +133,8 @@ int main(int argc, char** argv)
 
     /* flush the decoder */
     decode(c, frame, NULL);
+    
+    int frames_tot = c->frame_number;
 
     fclose(f);
 
@@ -142,6 +144,12 @@ int main(int argc, char** argv)
     av_packet_free(&pkt);
 
     auto end = get_timestamp();
-    std::cout << "elapsed: " << (end - start) << std::endl;
+    double duration = (end - start)/1000.0;
+    double fps = frames_tot/duration;
+
+    std::cout << "Frame number: " << frames_tot 
+              << ", Time elapsed: " << duration
+              << "s, FPS: " << fps 
+              << std::endl;
     return 0;
 }

@@ -8,7 +8,7 @@ import queue
 import numpy as np
 import argparse
 
-def producer(path, use_gpu, frame_queue):
+def producer(path, use_gpu, frame_queue, result_queue):
     """get images from file and put them in a queue"""
 
     if use_gpu:
@@ -27,6 +27,7 @@ def producer(path, use_gpu, frame_queue):
         frame_queue.put((frame_gray, frame_num))
         
     stream.release()
+    result_queue.put(frame_num)
     # Wait until queue is emptied by consumers 
     frame_queue.join()
 
@@ -60,7 +61,7 @@ def start(frame_queue, result_queue, videofile, n_consumers,
         p.start()
 
     producer_process = Process(target=producer, 
-                        args=(videofile,use_gpu,frame_queue,))    
+                        args=(videofile,use_gpu,frame_queue,result_queue,))    
     producer_process.start()
 
     # wait for producers to terminate
@@ -69,11 +70,16 @@ def start(frame_queue, result_queue, videofile, n_consumers,
     except KeyboardInterrupt:
         producer_process.terminate()
         producer_process.join()
-   
+
+    return result_queue.get()
+
 def busy_wait(dt):   
     current_time = time.time()
     while (time.time() < current_time+dt):
         pass    
+
+def do_nothing(frame,frame_num,frame_queue,result_queue):
+    pass
 
 def synthetic_load_light(frame,frame_num,frame_queue,result_queue):
     time.sleep(0.1) 
@@ -139,6 +145,7 @@ if __name__ == "__main__":
 
     qsize = args.queuesize
     n_consumers = args.n
+    num_frames = 0
 
     frame_queue = JoinableQueue(maxsize = qsize)
     result_queue = Queue()
@@ -151,10 +158,13 @@ if __name__ == "__main__":
         pfun = synthetic_load_single_core
     elif (args.load == "L"):                                                
         pfun = synthetic_load_light
+    elif (args.load == "N"):                                                
+        pfun = do_nothing
     else:
         raise ValueError
 
-    start(
+    start_time = time.time()
+    num_frames = start(
         frame_queue, 
         result_queue, 
         videofile, 
@@ -162,3 +172,8 @@ if __name__ == "__main__":
         pfun,
         gpu
     )
+    stop_time = time.time()
+    duration = stop_time - start_time
+    fps = num_frames/duration
+
+    print("num frames : " + str(num_frames) + ", duration : " + str(duration) + ", FPS : " + str(fps))
