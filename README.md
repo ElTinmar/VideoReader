@@ -218,6 +218,20 @@ int main(int argc, char** argv)
 }
 ```
 
+compile with 
+
+```
+g++ naive_ffmpeg.cpp \
+-I/home/martin/ffmpeg_build/include \
+-L/home/martin/ffmpeg_build/lib \
+-lavformat \
+-lavcodec \
+-lavutil \
+-lavdevice \
+-lavfilter \
+-o naive_ffmpeg
+```
+
 ## Multiprocessing producer-consumer scheme
 
 ``` python
