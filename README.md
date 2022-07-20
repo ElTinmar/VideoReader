@@ -131,6 +131,7 @@ int main(int argc, char** argv)
     size_t   data_size;
     int ret;
     int eof;
+    int num_threads = 1;
     AVPacket* pkt;
 
     if (argc <= 3) {
