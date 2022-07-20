@@ -20,6 +20,8 @@ General advice
 - Keep an eye on `top` or `htop` to see if all cores are in use
 - Keep an eye on the size of the producer queue 
 
+![alt text](https://github.com/ElTinMar/VideoReader/blob/main/producer_consumer.svg)
+
 ## download test video 
 
 ```
