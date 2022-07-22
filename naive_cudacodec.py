@@ -2,9 +2,14 @@
 
 import cv2
 import time
+import os
+
+videofile = '/home/martin/Desktop/forEmi/2021_07_26_B.avi'
+if not os.path.exists(videofile):
+	raise FileNotFoundError
 
 startTime = time.time()
-cap = cv2.cudacodec.createVideoReader('/home/martin/jumanji.mp4')
+cap = cv2.cudacodec.createVideoReader(videofile)
 ret, gpuFrame = cap.nextFrame()
 frame_num = 1
 while ret:
