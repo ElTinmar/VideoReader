@@ -26,11 +26,14 @@ while True:
     # Get frames here
     if use_gpu and cvcuda:
         rval, frame = cap.nextFrame()
-        if rval and host:
-            frame = frame.download()
+        if rval:
+            frame_gray = cv2.cuda.cvtColor(frame,cv2.COLOR_RGBA2GRAY)
+            if host:
+                frame_gray = frame_gray.download()
     else:
         rval, frame = cap.read()
-        #frame_gray = cv2.cvtColor(frame,cv2.COLOR_RGB2GRAY) 
+        if rval:
+            frame_gray = cv2.cvtColor(frame,cv2.COLOR_RGB2GRAY) 
     
     if not rval:
         break
@@ -38,7 +41,7 @@ while True:
     frame_num += 1
     
     try:
-        pfun(frame,frame_num)
+        pfun(frame_gray,frame_num)
     except KeyboardInterrupt:
         break
 

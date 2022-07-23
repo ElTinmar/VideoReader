@@ -12,29 +12,46 @@ import utils
 def producer(path, use_gpu, frame_queue, result_queue):
     """get images from file and put them in a queue"""
 
+    tStt = time.time()
+    # Hardware acceleration on NVIDIA GPU 
     if use_gpu:
-        os.environ["OPENCV_FFMPEG_CAPTURE_OPTIONS"]="video_codec;h264_cuvid"
+        if cvcuda:
+            cap = cv2.cudacodec.createVideoReader(videofile)
+        else:
+            os.environ["OPENCV_FFMPEG_CAPTURE_OPTIONS"]="video_codec;h264_cuvid"
+            cap = cv2.VideoCapture(videofile, cv2.CAP_FFMPEG)
+    else:
+        cap = cv2.VideoCapture(videofile, cv2.CAP_FFMPEG)
 
-    stream = cv2.VideoCapture(path)
     frame_num = 0
         
     while True:
-        grabbed, frame = stream.read()
-        if not grabbed:
+        # Get frames here
+        if use_gpu and cvcuda:
+            rval, frame = cap.nextFrame()
+            if rval:
+                frame_gray = cv2.cuda.cvtColor(frame,cv2.COLOR_RGBA2GRAY)
+                if host:
+                    frame_gray = frame_gray.download()
+        else:
+            rval, frame = cap.read()
+            if rval:
+                frame_gray = cv2.cvtColor(frame,cv2.COLOR_RGB2GRAY) 
+             
+        if not rval:
             break
-                
-        frame_gray = cv2.cvtColor(frame,cv2.COLOR_RGB2GRAY)        
+           
         frame_num += 1
         frame_queue.put((frame_gray, frame_num))
-        
-    stream.release()
+
     result_queue.put(frame_num)
     # Wait until queue is emptied by consumers 
     frame_queue.join()
+    print("Producer time: " +  str(time.time()-tStt))
 
 def consumer(frame_queue, result_queue, process_num, process_fun):
     """process images from the queue """
-
+    
     while True: 
         try:
             # get frame and frame number from the queue
@@ -46,7 +63,7 @@ def consumer(frame_queue, result_queue, process_num, process_fun):
             
         except queue.Empty:
             pass
-        
+
 def start(frame_queue, result_queue, videofile, n_consumers,
             process_fun, use_gpu):
     """spawn all the processes"""
@@ -76,8 +93,18 @@ def start(frame_queue, result_queue, videofile, n_consumers,
 
 if __name__ == "__main__":
     
-    videofile, gpu, pfun, n_consumers, qsize = utils.parse_arguments()
+    (videofile, 
+    gpu, 
+    pfun, 
+    cvcuda, 
+    host, 
+    n_consumers, 
+    qsize) = utils.parse_arguments()
     
+    if cvcuda and not host:
+        print("cvcuda requires host because gpuMat cannot be pickled to multiprocessing Queue")
+        exit()
+
     frame_queue = JoinableQueue(maxsize = qsize)
     result_queue = Queue()
     
