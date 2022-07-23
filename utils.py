@@ -1,6 +1,7 @@
 import numpy as np
 import time
 import argparse
+import cv2
 import os
 
 def busy_wait(dt):
@@ -21,12 +22,22 @@ def synthetic_load_single_core(frame,frame_num):
 
 def synthetic_load_multi_core(frame,frame_num):
      # CPU intensive multithreaded (tune with OMP_NUM_THREADS) 
-    try:
-        frame32 = np.float32(frame)                                                 
-        u, s, vh = np.linalg.svd(frame32)
-        print(frame_num)
-    except np.linalg.LinAlgError:
-        print(str(frame_num) + ' SVD did not converge')
+    if type(frame) == cv2.cuda.GpuMat:
+        raise TypeError('frame in GPU mem, use --host option') 
+    else:
+        try:
+            frame32 = np.float32(frame)                                                 
+            u, s, vh = np.linalg.svd(frame32)
+            print(frame_num)
+        except np.linalg.LinAlgError:
+            print(str(frame_num) + ' SVD did not converge')
+
+def time_exec(fun):
+    startTime = time.time()
+    ret = fun()
+    stopTime = time.time()
+    duration = stopTime - startTime
+    return ret, duration
 
 def parse_arguments():
     
@@ -43,20 +54,41 @@ def parse_arguments():
         type = str,                                                             
         default = "MC",                                                         
         help = 'Synthetic load: light L, single core SC, multicore MC'          
-    )  
+    )
+    parser.add_argument(
+        '-n',
+        type = int,
+        default = 1,
+        help = 'number of consumer processes'
+    )
+    parser.add_argument(
+        '--queuesize',
+        '-q',
+        default = 2048,
+        type = int,
+        help = 'Max size of the frame buffer'
+    )
     parser.add_argument(
         '--gpu',
         action = 'store_true',
-        help = 'Use GPU for hardware accelerated decoding with FFMPEG'
+        help = 'Use GPU for hardware acceleration'
     )
+    parser.add_argument(
+        '--cvcuda',
+        action = 'store_true',
+        help = 'Use GPU via opencv cuda interface'
+    )
+    parser.add_argument(
+        '--host',
+        action = 'store_true',
+        help = 'Get image data from GPU to host'
+    )
+
     args = parser.parse_args()
 
     # check that video file exists
-    videofile = args.videofile
-    if not os.path.exists(videofile):
+    if not os.path.exists(args.videofile):
         raise FileNotFoundError
-
-    use_gpu = args.gpu
 
     if (args.load == "MC"):
         pfun = synthetic_load_multi_core
@@ -69,4 +101,12 @@ def parse_arguments():
     else:
         raise ValueError
 
-    return videofile, use_gpu, pfun        
+    return (
+        args.videofile, 
+        args.gpu, 
+        pfun, 
+        args.cvcuda, 
+        args.host, 
+        args.n, 
+        args.queuesize  
+    )
