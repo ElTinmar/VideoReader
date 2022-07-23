@@ -6,6 +6,49 @@ import time
 import numpy as np
 import argparse
 
+def parse_arguments():
+    
+    parser = argparse.ArgumentParser(
+        description='Benchmark producer-consumer video reader'
+    )
+    parser.add_argument(
+        'videofile', 
+        type = str,
+        help = 'Path to the video'
+    )
+    parser.add_argument(                                                        
+        '--load',                                                               
+        type = str,                                                             
+        default = "MC",                                                         
+        help = 'Synthetic load: light L, single core SC, multicore MC'          
+    )  
+    parser.add_argument(
+        '--gpu',
+        action = 'store_true',
+        help = 'Use GPU for hardware accelerated decoding with FFMPEG'
+    )
+    args = parser.parse_args()
+
+    # check that video file exists
+    videofile = args.videofile
+    if not os.path.exists(videofile):
+        raise FileNotFoundError
+
+    use_gpu = args.gpu
+
+    if (args.load == "MC"):
+        pfun = synthetic_load_multi_core
+    elif (args.load == "SC"):
+        pfun = synthetic_load_single_core
+    elif (args.load == "L"):
+        pfun = synthetic_load_light
+    elif (args.load == "N"):
+        pfun = do_nothing
+    else:
+        raise ValueError
+
+    return videofile, use_gpu, pfun
+        
 def busy_wait(dt):
     current_time = time.time()
     while (time.time() < current_time+dt):
@@ -31,49 +74,13 @@ def synthetic_load_multi_core(frame,frame_num):
     except np.linalg.LinAlgError:
         print(str(frame_num) + ' SVD did not converge')
 
-parser = argparse.ArgumentParser(
-    description='Benchmark producer-consumer video reader'
-)
-parser.add_argument(
-    'videofile', 
-    type = str,
-    help = 'Path to the video'
-)
-parser.add_argument(                                                        
-    '--load',                                                               
-    type = str,                                                             
-    default = "MC",                                                         
-    help = 'Synthetic load: light L, single core SC, multicore MC'          
-)  
-parser.add_argument(
-    '--gpu',
-    action = 'store_true',
-    help = 'Use GPU for hardware accelerated decoding with FFMPEG'
-)
-args = parser.parse_args()
 
-# check that video file exists
-videofile = args.videofile
-if not os.path.exists(videofile):
-    raise FileNotFoundError
-
-use_gpu = args.gpu
-
-if (args.load == "MC"):
-    pfun = synthetic_load_multi_core
-elif (args.load == "SC"):
-    pfun = synthetic_load_single_core
-elif (args.load == "L"):
-    pfun = synthetic_load_light
-elif (args.load == "N"):
-    pfun = do_nothing
-else:
-    raise ValueError
+videofile, use_gpu, pfun = parse_arguments()
 
 # Hardware acceleration on NVIDIA GPU if FFMPEG was compiled with CUVID support
 if use_gpu:
-	os.environ["OPENCV_FFMPEG_CAPTURE_OPTIONS"]="video_codec;h264_cuvid"
-	
+    os.environ["OPENCV_FFMPEG_CAPTURE_OPTIONS"]="video_codec;h264_cuvid"
+
 cap = cv2.VideoCapture(videofile, cv2.CAP_FFMPEG)
 frame_num = 0
 duration = 0
