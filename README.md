@@ -3,7 +3,7 @@
 TL/DR
 
 - Matlab VideoReader is slowish but not that bad
-- Using single vs double precision images may be faster
+- Using single vs double precision images for processing is faster (TODO test with uint8 and bool)
 - Using a multiprocessed producer-consumer scheme instead of the naive sequential read-process approach can yield significant improvements 
 in overall speed if the processing task is long and not already multithreaded. 
 - For short processing tasks, the overhead introduced by the multiprocessing approach results in no clear benefits or even worse performance than the sequential approach 
@@ -11,6 +11,7 @@ in overall speed if the processing task is long and not already multithreaded.
 - If the task is already multithreaded (e.g. SVD from openBLAS), reducing OMP_NUM_THREADS (controls the number of parallel threads for openBLAS) and increasing the number of consumers may increase performance
 - When processing is slow, using hardware acceleration to decode frames from the video file can free up CPU resources. If the producer queue gets 
 full quickly, there may be an initial speed up, but the producer won't be using many CPU cycles anyway
+- GPU speedup depends on the size of the video (1080p will benefit more from GPU decoding than 320p)
 - TO TEST Running the consumer processing code on the GPU when possible can yield a significant speed-up 
 - TO TEST You may need parallel producers (read several video chunks at the same time) if you are doing some very light processing (e.g. just counting the number of frames)
 - TO TEST Hyperthreading ? On hyperthreaded processors, it looks like peak performance is reached for OMP_NUM_THREADS = num physical cores. Popular wisdom tends to advise against hyperthreading
