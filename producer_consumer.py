@@ -40,9 +40,15 @@ def producer(path, use_gpu, frame_queue, result_queue):
              
         if not rval:
             break
-           
+        
+        # Push data to the Queue. WARNING sending large data (High-res image or 
+        # RGBA vs grayscale) will clog the queue
         frame_num += 1
         frame_queue.put((frame_gray, frame_num))
+
+        # Monitor the state of the queue
+        if (frame_num % 100) == 0:
+            print("Frame queue usage: " + str(100*frame_queue.qsize()/qsize) + "%")
 
     result_queue.put(frame_num)
     # Wait until queue is emptied by consumers 
