@@ -9,6 +9,9 @@ import numpy as np
 import argparse
 import utils
 
+### Queues are convenient to use but not super efficient to send large
+### arrays such as images
+
 def producer(path, use_gpu, frame_queue, result_queue):
     """get images from file and put them in a queue"""
 
