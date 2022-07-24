@@ -10,14 +10,10 @@ import argparse
 import utils
 from shared_buffer import SharedRingBuffer
 import ctypes 
-import cProfile
 
 def producer(videofile, buf, wlk, rlk, wrtCrsr, rdCrsr, qsize, itemSz):
     """get images from file and put them in a queue"""
     
-    pr = cProfile.Profile()
-    pr.enable()
-
     if use_gpu:
         if cvcuda:
             cap = cv2.cudacodec.createVideoReader(videofile)
@@ -29,6 +25,7 @@ def producer(videofile, buf, wlk, rlk, wrtCrsr, rdCrsr, qsize, itemSz):
         cap = cv2.VideoCapture(videofile, cv2.CAP_FFMPEG)
     
     srb = SharedRingBuffer(qsize, itemSz, buf, wlk, rlk, wrtCrsr, rdCrsr)
+   
     frame_num = 0
     tStt = time.time()
     while True:
@@ -48,9 +45,12 @@ def producer(videofile, buf, wlk, rlk, wrtCrsr, rdCrsr, qsize, itemSz):
             break
         
         frame_num += 1
-        ok = srb.push(frame_gray.reshape(itemSz),block=True,timeout=0.00001)
+        h0,h1,h2,h3 = utils.int32_to_uint8x4(frame_num)
+        header = np.array([h0,h1,h2,h3], dtype=np.uint8)
+        data = np.concatenate((header,frame_gray.reshape(width*height)),axis=None)
+        ok = srb.push(data,block=True,timeout=0.00001)
 
-        # Monitqor the state of the queue
+        # Monitor the state of the queue
         if (frame_num % 100) == 0:
             print("Frame queue usage: " + str(100*srb.size()/srb.totalSize) + "%")
 
@@ -60,38 +60,36 @@ def producer(videofile, buf, wlk, rlk, wrtCrsr, rdCrsr, qsize, itemSz):
 
     # Send poison pill to all workers
     for i in range(n_consumers):
-        poison_pill = -1*np.ones(height*width,dtype=int)
+        header = np.array([255,255,255,255], dtype=np.uint8)
+        dummy = np.zeros(height*width,dtype=np.uint8)
+        poison_pill = np.concatenate((header,dummy),axis=None)
         srb.push(poison_pill)
     
     print("Producer time: " +  str(time.time()-tStt))
-    pr.disable()
-    pr.print_stats(sort='tottime')
 
 def consumer(buf, wlk, rlk, wrtCrsr, rdCrsr, qsize, itemSz, process_num, process_fun):
     """process images from the queue """
-   
-    pr = cProfile.Profile()                                                     
-    pr.enable()
 
     srb = SharedRingBuffer(qsize, itemSz, buf, wlk, rlk, wrtCrsr, rdCrsr)
-
+    
+    tStt = time.time()
     while True: 
         # get frame and frame number from the queue
-        ok, frame = srb.pop(block=False,timeout=0.000001)                                                                                                             
+        ok, data = srb.pop(block=False,timeout=0.000001)                                                                                                             
         if ok:
-            if frame[0] == -1: # poison pill
+            data = np.asarray(data)
+            header, frame = np.split(data,[4])
+            if all(header == 255): # poison pill
                 print("consumer {0}, received poison pill".format(process_num))
                 break
             
-            frame = np.asarray(frame)
+            frame_num = utils.uint8x4_to_int32(header[0],header[1],header[2],header[3])
             frame = frame.reshape((height,width))
             
             # do some processing
             process_fun(frame,[])
-    
-    pr.disable()
-    time.sleep(process_num+1)
-    pr.print_stats(sort='tottime')
+
+    print("Consumer {0} time: {1}".format(process_num,time.time()-tStt))
 
 def start(buf, wlk, rlk, wrtCrsr,rdCrsr, videofile, qsize, itemSz, n_consumers, process_fun):
     """spawn all the processes"""
@@ -141,10 +139,10 @@ if __name__ == "__main__":
     host = True
 
     print('Allocate buffer')
-    itemSize = width*height
+    itemSize = width*height+4 # image + 4 bytes header 
     rlk = Lock()
     wlk = Lock()
-    buf = RawArray('B',qsize*itemSize) #uint8 data
+    buf = RawArray('B',qsize*itemSize) #uint8 frame data + 4 bytes header
     wrtCrsr = RawValue('i',0)
     rdCrsr = RawValue('i',0)
 

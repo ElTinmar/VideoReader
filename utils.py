@@ -3,6 +3,15 @@ import time
 import argparse
 import cv2
 import os
+import struct 
+
+def int32_to_uint8x4(n):
+    int32 = struct.pack("I", n)
+    return struct.unpack("B" * 4, int32)
+
+def uint8x4_to_int32(u0,u1,u2,u3):
+    int32 = struct.pack('BBBB',u0,u1,u2,u3)
+    return struct.unpack("I", int32)[0]
 
 def busy_wait(dt):
     current_time = time.time()

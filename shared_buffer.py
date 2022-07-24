@@ -1,8 +1,10 @@
+from threading import Thread
 from multiprocessing import Process, Lock
 from multiprocessing.sharedctypes import RawArray, RawValue
 from ctypes import c_int
 import time
 import numpy as np
+import cProfile
 
 class SharedRingBuffer:
     
@@ -26,7 +28,7 @@ class SharedRingBuffer:
         self.read_cursor = read_cursor
         self.rLock = shared_rlock
         self.wLock = shared_wlock
-        self._debug = False 
+        self._debug = False
 
     def full(self):
         return self.write_cursor.value == ((self.read_cursor.value - self.itemSize) % self.totalSize)
@@ -39,7 +41,7 @@ class SharedRingBuffer:
 
     def push(self, item, block=False, timeout=0.1):
         ''' Add item at the back '''
-
+        
         # check that item is the right size/type
         self.check(item)
 
@@ -53,7 +55,7 @@ class SharedRingBuffer:
                 self.wLock.acquire()
         else:
             tStart = tNow = time.monotonic()
-            while self.full() and tNow-tStart < timeout:
+            while tNow-tStart < timeout and self.full():
                 self.wLock.release()
                 time.sleep(timeout)
                 tNow = time.monotonic()

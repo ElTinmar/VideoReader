@@ -8,7 +8,6 @@ import queue
 import numpy as np
 import argparse
 import utils
-import cProfile
 
 ### Queues are convenient to use but not super efficient to send large
 ### arrays such as images
@@ -16,8 +15,6 @@ import cProfile
 def producer(path, use_gpu, frame_queue, result_queue):
     """get images from file and put them in a queue"""
 
-    pr = cProfile.Profile()                                                     
-    pr.enable() 
     tStt = time.time()
     # Hardware acceleration on NVIDIA GPU 
     if use_gpu:
@@ -60,8 +57,6 @@ def producer(path, use_gpu, frame_queue, result_queue):
     # Wait until queue is emptied by consumers 
     frame_queue.join()
     print("Producer time: " +  str(time.time()-tStt))
-    pr.disable()                                                                
-    pr.print_stats(sort='tottime')
 
 def consumer(frame_queue, result_queue, process_num, process_fun):
     """process images from the queue """
