@@ -1,30 +1,36 @@
 #!/usr/bin/env python3
 
-from multiprocessing import Process, Queue, JoinableQueue
+from multiprocessing import Process, Lock
+from multiprocessing.sharedctypes import RawArray, RawValue
 import cv2
 import time
 import os
-import queue
 import numpy as np
 import argparse
 import utils
+from shared_buffer import SharedRingBuffer
+import ctypes 
+import cProfile
 
-def producer(path, use_gpu, frame_queue, result_queue):
+def producer(videofile, buf, wlk, rlk, wrtCrsr, rdCrsr, qsize, itemSz):
     """get images from file and put them in a queue"""
+    
+    pr = cProfile.Profile()
+    pr.enable()
 
-    tStt = time.time()
-    # Hardware acceleration on NVIDIA GPU 
     if use_gpu:
         if cvcuda:
             cap = cv2.cudacodec.createVideoReader(videofile)
+            fmt = cap.format()
         else:
             os.environ["OPENCV_FFMPEG_CAPTURE_OPTIONS"]="video_codec;h264_cuvid"
             cap = cv2.VideoCapture(videofile, cv2.CAP_FFMPEG)
     else:
         cap = cv2.VideoCapture(videofile, cv2.CAP_FFMPEG)
-
+    
+    srb = SharedRingBuffer(qsize, itemSz, buf, wlk, rlk, wrtCrsr, rdCrsr)
     frame_num = 0
-        
+    tStt = time.time()
     while True:
         # Get frames here
         if use_gpu and cvcuda:
@@ -37,41 +43,57 @@ def producer(path, use_gpu, frame_queue, result_queue):
             rval, frame = cap.read()
             if rval:
                 frame_gray = cv2.cvtColor(frame,cv2.COLOR_RGB2GRAY) 
-             
+        
         if not rval:
             break
         
-        # Push data to the Queue. WARNING sending large data (High-res image or 
-        # RGBA vs grayscale) will clog the queue
         frame_num += 1
-        frame_queue.put((frame_gray, frame_num))
+        ok = srb.push(frame_gray.reshape(itemSz),block=True,timeout=0.00001)
 
-        # Monitor the state of the queue
+        # Monitqor the state of the queue
         if (frame_num % 100) == 0:
-            print("Frame queue usage: " + str(100*frame_queue.qsize()/qsize) + "%")
+            print("Frame queue usage: " + str(100*srb.size()/srb.totalSize) + "%")
 
-    result_queue.put(frame_num)
-    # Wait until queue is emptied by consumers 
-    frame_queue.join()
-    print("Producer time: " +  str(time.time()-tStt))
+    # Wait for all frames to be consumed
+    while not srb.empty():
+        time.sleep(0.1)
 
-def consumer(frame_queue, result_queue, process_num, process_fun):
-    """process images from the queue """
+    # Send poison pill to all workers
+    for i in range(n_consumers):
+        poison_pill = -1*np.ones(height*width,dtype=int)
+        srb.push(poison_pill)
     
-    while True: 
-        try:
-            # get frame and frame number from the queue
-            frame, frame_num = frame_queue.get(block=False)                                                                                                             
-            # do some processing
-            process_fun(frame,frame_num)
-            
-            frame_queue.task_done()
-            
-        except queue.Empty:
-            pass
+    print("Producer time: " +  str(time.time()-tStt))
+    pr.disable()
+    pr.print_stats(sort='tottime')
 
-def start(frame_queue, result_queue, videofile, n_consumers,
-            process_fun, use_gpu):
+def consumer(buf, wlk, rlk, wrtCrsr, rdCrsr, qsize, itemSz, process_num, process_fun):
+    """process images from the queue """
+   
+    pr = cProfile.Profile()                                                     
+    pr.enable()
+
+    srb = SharedRingBuffer(qsize, itemSz, buf, wlk, rlk, wrtCrsr, rdCrsr)
+
+    while True: 
+        # get frame and frame number from the queue
+        ok, frame = srb.pop(block=False,timeout=0.000001)                                                                                                             
+        if ok:
+            if frame[0] == -1: # poison pill
+                print("consumer {0}, received poison pill".format(process_num))
+                break
+            
+            frame = np.asarray(frame)
+            frame = frame.reshape((height,width))
+            
+            # do some processing
+            process_fun(frame,[])
+    
+    pr.disable()
+    time.sleep(process_num+1)
+    pr.print_stats(sort='tottime')
+
+def start(buf, wlk, rlk, wrtCrsr,rdCrsr, videofile, qsize, itemSz, n_consumers, process_fun):
     """spawn all the processes"""
 
     # start consumers and producers                                             
@@ -79,13 +101,15 @@ def start(frame_queue, result_queue, videofile, n_consumers,
     for i in range(n_consumers):                                                
         p = Process(
             target=consumer, 
-            args=(frame_queue, result_queue, i, process_fun,),
-            daemon=True) # allow consumers to be closed when queue is empty
+            args=(buf, wlk, rlk, wrtCrsr, rdCrsr, qsize, itemSz, i, process_fun),
+        )
         consumer_process.append(p)                                              
         p.start()
 
-    producer_process = Process(target=producer, 
-                        args=(videofile,use_gpu,frame_queue,result_queue,))    
+    producer_process = Process(
+        target=producer, 
+        args=(videofile, buf, wlk, rlk, wrtCrsr, rdCrsr, qsize, itemSz)
+        )    
     producer_process.start()
 
     # wait for producers to terminate
@@ -95,37 +119,56 @@ def start(frame_queue, result_queue, videofile, n_consumers,
         producer_process.terminate()
         producer_process.join()
 
-    return result_queue.get()
+    return 0
 
 if __name__ == "__main__":
     
     (videofile, 
-    gpu, 
+    use_gpu, 
     pfun, 
     cvcuda, 
     host, 
     n_consumers, 
     qsize) = utils.parse_arguments()
     
-    if cvcuda and not host:
-        print("cvcuda requires host because gpuMat cannot be pickled to multiprocessing Queue")
-        exit()
+    ## Get video info
+    cap = cv2.VideoCapture(videofile,cv2.CAP_FFMPEG)
+    width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
+    height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
+    cap.release()
 
-    frame_queue = JoinableQueue(maxsize = qsize)
-    result_queue = Queue()
-    
+    ## FORCE HOST
+    host = True
+
+    print('Allocate buffer')
+    itemSize = width*height
+    rlk = Lock()
+    wlk = Lock()
+    buf = RawArray('B',qsize*itemSize) #uint8 data
+    wrtCrsr = RawValue('i',0)
+    rdCrsr = RawValue('i',0)
+
     num_frames = 0
     start_time = time.time()
     num_frames = start(
-        frame_queue, 
-        result_queue, 
+        buf,
+        wlk,
+        rlk,
+        wrtCrsr,
+        rdCrsr,
         videofile, 
+        qsize,
+        itemSize,
         n_consumers, 
-        pfun,
-        gpu
+        pfun
     )
     stop_time = time.time()
     duration = stop_time - start_time
     fps = num_frames/duration
 
-    print("num frames : " + str(num_frames) + ", duration : " + str(duration) + ", FPS : " + str(fps))
+    print("#frames: {0}, duration: {1}, FPS: {2}".format(
+        num_frames, 
+        duration, 
+        fps
+        )
+    )

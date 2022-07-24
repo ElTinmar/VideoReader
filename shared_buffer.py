@@ -11,7 +11,8 @@ class SharedRingBuffer:
         maxNumItems, 
         itemSize, 
         shared_array, 
-        shared_lock, 
+        shared_wlock,
+        shared_rlock,
         write_cursor,
         read_cursor
     ):
@@ -23,7 +24,9 @@ class SharedRingBuffer:
         self.data = shared_array
         self.write_cursor = write_cursor
         self.read_cursor = read_cursor
-        self.lock = shared_lock
+        self.rLock = shared_rlock
+        self.wLock = shared_wlock
+        self._debug = False 
 
     def full(self):
         return self.write_cursor.value == ((self.read_cursor.value - self.itemSize) % self.totalSize)
@@ -31,69 +34,77 @@ class SharedRingBuffer:
     def empty(self):
         return self.write_cursor.value == self.read_cursor.value
 
+    def check(self,item):
+        pass
+
     def push(self, item, block=False, timeout=0.1):
         ''' Add item at the back '''
 
-        # check that item is the right size/type other throw ValueError
+        # check that item is the right size/type
+        self.check(item)
 
-        self.lock.acquire()
+        self.wLock.acquire()
 
         # if buffer is full wait until data is read
         if block:
             while self.full():
-                self.lock.release()
-                time.sleep(0.1)
-                self.lock.acquire()
+                self.wLock.release()
+                time.sleep(timeout)
+                self.wLock.acquire()
         else:
             tStart = tNow = time.monotonic()
             while self.full() and tNow-tStart < timeout:
-                self.lock.release()
-                time.sleep(0.1)
+                self.wLock.release()
+                time.sleep(timeout)
                 tNow = time.monotonic()
-                self.lock.acquire()
+                self.wLock.acquire()
             
             if tNow-tStart >= timeout: # timeout occured
-                self.lock.release()
+                self.wLock.release()
                 return
     
         # add item
-        self.data[self.write_cursor.value:self.write_cursor.value+self.itemSize] = item
+        tStrt = time.monotonic()
+        memoryview(self.data).cast('B')[self.write_cursor.value:self.write_cursor.value+self.itemSize] = item
+        if self._debug: print("Pushing took {0}".format(time.monotonic()-tStrt))
         
         # update write cursor
         self.write_cursor.value = (self.write_cursor.value + self.itemSize) % self.totalSize
         
-        self.lock.release()
+        self.wLock.release()
 
     def pop(self, block=False, timeout=0.1):
         ''' Return item from the front '''
-        
-        self.lock.acquire()
+
+        self.rLock.acquire()
 
         # check if buffer is not empty
         if block:
             while self.empty():
-                self.lock.release()
-                time.sleep(0.1)
-                self.lock.acquire()
+                self.rLock.release()
+                time.sleep(timeout)
+                self.rLock.acquire()
         else:
             tStart = tNow = time.monotonic()
             while self.empty() and tNow-tStart < timeout:
-                self.lock.release()
-                time.sleep(0.1)
+                self.rLock.release()
+                time.sleep(timeout)
                 tNow = time.monotonic()
-                self.lock.acquire()
+                self.rLock.acquire()
 
             if tNow-tStart >= timeout: # timeout occured
-                self.lock.release()
+                self.rLock.release()
                 return (False, [])
 
         # fetch item
-        item = self.data[self.read_cursor.value:self.read_cursor.value+self.itemSize]
+        tStrt = time.monotonic()
+        item = memoryview(self.data).cast('B')[self.read_cursor.value:self.read_cursor.value+self.itemSize]
+        if self._debug: print("Poping took {0}".format(time.monotonic()-tStrt))
 
         # update read cursor
         self.read_cursor.value = (self.read_cursor.value + self.itemSize) % self.totalSize
         
-        self.lock.release()
+        self.rLock.release()
 
         return True, item
 
