@@ -89,7 +89,7 @@ def consumer(buf, wlk, rlk, wrtCrsr, rdCrsr, qsize, itemSz, process_num, process
             frame = frame.reshape((height,width))
             
             # do some processing
-            process_fun(frame,[])
+            process_fun(frame,frame_num)
 
     print("Consumer {0} time: {1}".format(process_num,time.time()-tStt))
 
