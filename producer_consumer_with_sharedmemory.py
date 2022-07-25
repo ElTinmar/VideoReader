@@ -36,6 +36,8 @@ def producer(videofile, buf, wlk, rlk, wrtCrsr, rdCrsr, qsize, itemSz):
                 frame_gray = cv2.cuda.cvtColor(frame,cv2.COLOR_RGBA2GRAY)
                 if host:
                     frame_gray = frame_gray.download()
+                    # weird, frame returned has extra columns
+                    frame_gray = frame_gray[0:height,0:width]
         else:
             rval, frame = cap.read()
             if rval:
