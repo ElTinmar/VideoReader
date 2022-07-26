@@ -19,15 +19,16 @@ def busy_wait(dt):
         pass
 
 def do_nothing(frame,frame_num):
+    #print(frame_num)
     pass
 
 def synthetic_load_light(frame,frame_num):
     time.sleep(0.1) 
-    print(frame_num)
+    #print(frame_num)
     
 def synthetic_load_single_core(frame,frame_num):
     busy_wait(0.1) 
-    print(frame_num)
+    #print(frame_num)
 
 def synthetic_load_multi_core(frame,frame_num):
      # CPU intensive multithreaded (tune with OMP_NUM_THREADS) 
@@ -37,9 +38,10 @@ def synthetic_load_multi_core(frame,frame_num):
         try:
             frame32 = np.float32(frame)                                                 
             u, s, vh = np.linalg.svd(frame32)
-            print(frame_num)
+            #print(frame_num)
         except np.linalg.LinAlgError:
-            print(str(frame_num) + ' SVD did not converge')
+            pass
+            #print(str(frame_num) + ' SVD did not converge')
 
 def time_exec(fun):
     startTime = time.time()

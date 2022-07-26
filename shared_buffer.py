@@ -2,20 +2,25 @@ from threading import Thread
 from multiprocessing import Process, Lock
 from multiprocessing.sharedctypes import RawArray, RawValue
 import time
+import numpy as np
 
 class SharedRingBuffer:
     
     def __init__(
         self, 
         maxNumItems, 
-        itemSize, 
+        itemSize = 1,
+        buftype = 'B'
     ):
         ''' Allocate shared array '''
         
+        #TODO check input args type/size/values
+
         self.maxNumItems = maxNumItems
         self.itemSize = itemSize
         self.totalSize = maxNumItems*itemSize
-        self.data = RawArray('B',maxNumItems*itemSize)
+        self.buftype = buftype
+        self.data = RawArray(buftype, maxNumItems*itemSize)
         self.write_cursor = RawValue('i',0)
         self.read_cursor = RawValue('i',0)
         self.rLock = Lock()
@@ -32,7 +37,8 @@ class SharedRingBuffer:
 
     def check(self,item):
         # TODO check size
-        # TODO check type
+        # TODO check type, has to be a bytes object (np array with ndim = 1 works)
+        
         pass
 
     def push(self, item, block=False, timeout=0.1):
@@ -58,11 +64,20 @@ class SharedRingBuffer:
             if tNow-tStart >= timeout: # timeout occured
                 self.wLock.release()
                 return
-       
+        
+        # update buffer, use memoryview for direct buffer access 
         idx_start = self.write_cursor.value
         idx_stop = idx_start + self.itemSize
-        # update buffer, use memoryview for direct buffer access 
-        memoryview(self.data).cast('B')[idx_start:idx_stop] = item
+        if self.buftype == 'B':
+            mview = memoryview(self.data).cast('B')
+        elif self.buftype == 'i':
+            mview = memoryview(self.data).cast('B').cast('i')
+        
+        if self.itemSize == 1:
+            mview[idx_start] = item
+        else:
+            mview[idx_start:idx_stop] = item
+        
         # update write cursor
         self.write_cursor.value = idx_stop % self.totalSize
         self.wLock.release()
@@ -92,7 +107,17 @@ class SharedRingBuffer:
         idx_start = self.read_cursor.value
         idx_stop = idx_start + self.itemSize
         # fetch item, use memoryview for direct buffer access
-        item = memoryview(self.data).cast('B')[idx_start:idx_stop]
+        if self.buftype == 'B':
+            mview = memoryview(self.data).cast('B')
+        elif self.buftype == 'i':
+            mview = memoryview(self.data).cast('B').cast('i')
+
+        # make a copy outside of the buffer before you return it     
+        if self.itemSize == 1:
+            item = mview[idx_start]
+        else:
+            item = np.array(mview[idx_start:idx_stop],copy=True)
+        
         # update read cursor
         self.read_cursor.value = idx_stop % self.totalSize
         self.rLock.release()

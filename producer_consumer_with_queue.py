@@ -51,7 +51,11 @@ def producer(path, use_gpu, frame_queue, result_queue):
 
         # Monitor the state of the queue
         if (frame_num % 100) == 0:
-            print("Frame queue usage: " + str(100*frame_queue.qsize()/qsize) + "%")
+            print("Frame {0}, Frame queue usage: {1}%".format(
+                frame_num,
+                100*frame_queue.qsize()/qsize
+                )
+            )
 
     result_queue.put(frame_num)
     # Wait until queue is emptied by consumers 
