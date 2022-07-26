@@ -1,10 +1,7 @@
 from threading import Thread
 from multiprocessing import Process, Lock
 from multiprocessing.sharedctypes import RawArray, RawValue
-from ctypes import c_int
 import time
-import numpy as np
-import cProfile
 
 class SharedRingBuffer:
     
@@ -12,31 +9,30 @@ class SharedRingBuffer:
         self, 
         maxNumItems, 
         itemSize, 
-        shared_array, 
-        shared_wlock,
-        shared_rlock,
-        write_cursor,
-        read_cursor
     ):
         ''' Allocate shared array '''
         
         self.maxNumItems = maxNumItems
         self.itemSize = itemSize
         self.totalSize = maxNumItems*itemSize
-        self.data = shared_array
-        self.write_cursor = write_cursor
-        self.read_cursor = read_cursor
-        self.rLock = shared_rlock
-        self.wLock = shared_wlock
+        self.data = RawArray('B',maxNumItems*itemSize)
+        self.write_cursor = RawValue('i',0)
+        self.read_cursor = RawValue('i',0)
+        self.rLock = Lock()
+        self.wLock = Lock()
         self._debug = False
 
     def full(self):
-        return self.write_cursor.value == ((self.read_cursor.value - self.itemSize) % self.totalSize)
+        return self.write_cursor.value == (
+            (self.read_cursor.value-self.itemSize)%self.totalSize
+            )
 
     def empty(self):
         return self.write_cursor.value == self.read_cursor.value
 
     def check(self,item):
+        # TODO check size
+        # TODO check type
         pass
 
     def push(self, item, block=False, timeout=0.1):
@@ -44,9 +40,7 @@ class SharedRingBuffer:
         
         # check that item is the right size/type
         self.check(item)
-
         self.wLock.acquire()
-
         # if buffer is full wait until data is read
         if block:
             while self.full():
@@ -64,22 +58,19 @@ class SharedRingBuffer:
             if tNow-tStart >= timeout: # timeout occured
                 self.wLock.release()
                 return
-    
-        # add item
-        tStrt = time.monotonic()
-        memoryview(self.data).cast('B')[self.write_cursor.value:self.write_cursor.value+self.itemSize] = item
-        if self._debug: print("Pushing took {0}".format(time.monotonic()-tStrt))
-        
+       
+        idx_start = self.write_cursor.value
+        idx_stop = idx_start + self.itemSize
+        # update buffer, use memoryview for direct buffer access 
+        memoryview(self.data).cast('B')[idx_start:idx_stop] = item
         # update write cursor
-        self.write_cursor.value = (self.write_cursor.value + self.itemSize) % self.totalSize
-        
+        self.write_cursor.value = idx_stop % self.totalSize
         self.wLock.release()
 
     def pop(self, block=False, timeout=0.1):
         ''' Return item from the front '''
 
         self.rLock.acquire()
-
         # check if buffer is not empty
         if block:
             while self.empty():
@@ -98,50 +89,18 @@ class SharedRingBuffer:
                 self.rLock.release()
                 return (False, [])
 
-        # fetch item
-        tStrt = time.monotonic()
-        item = memoryview(self.data).cast('B')[self.read_cursor.value:self.read_cursor.value+self.itemSize]
-        if self._debug: print("Poping took {0}".format(time.monotonic()-tStrt))
-
+        idx_start = self.read_cursor.value
+        idx_stop = idx_start + self.itemSize
+        # fetch item, use memoryview for direct buffer access
+        item = memoryview(self.data).cast('B')[idx_start:idx_stop]
         # update read cursor
-        self.read_cursor.value = (self.read_cursor.value + self.itemSize) % self.totalSize
-        
+        self.read_cursor.value = idx_stop % self.totalSize
         self.rLock.release()
 
         return True, item
 
     def size(self):
         ''' Return number of items currently stored in the buffer '''
-        return (self.write_cursor.value - self.read_cursor.value)%self.totalSize
-
-def writer(M, sz, shr_array, lock, wc, rc):
-    buf = SharedRingBuffer(M,sz,shr_array,lock,wc,rc)
-    buf.push([1])
-    time.sleep(2)
-    ok, val = buf.pop()
-    if ok:
-        print(val)
-
-def reader(M, sz, shr_array, lock, wc, rc):
-    buf = SharedRingBuffer(M,sz,shr_array,lock,wc,rc)
-    ok, val = buf.pop()
-    if ok:
-        print(val)
-    buf.push([2])
-    
-if __name__ == '__main__':
-
-    itemSize = 1
-    maxNumItems = 10
-    l = Lock()
-    A = RawArray('i',maxNumItems*itemSize)
-    wc = RawValue('i',0)
-    rc = RawValue('i',0)
-    w = Process(target=writer, args=(maxNumItems,itemSize,A,l,wc,rc)) 
-    r = Process(target=reader, args=(maxNumItems,itemSize,A,l,wc,rc)) 
-    w.start()
-    r.start()
-    w.join()
-    r.join()
+        return (self.write_cursor.value-self.read_cursor.value)%self.totalSize
 
     

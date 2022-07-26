@@ -11,7 +11,7 @@ import utils
 from shared_buffer import SharedRingBuffer
 import ctypes 
 
-def producer(videofile, buf, wlk, rlk, wrtCrsr, rdCrsr, qsize, itemSz):
+def producer(videofile, frame_buffer):
     """get images from file and put them in a queue"""
     
     if use_gpu:
@@ -23,8 +23,6 @@ def producer(videofile, buf, wlk, rlk, wrtCrsr, rdCrsr, qsize, itemSz):
             cap = cv2.VideoCapture(videofile, cv2.CAP_FFMPEG)
     else:
         cap = cv2.VideoCapture(videofile, cv2.CAP_FFMPEG)
-    
-    srb = SharedRingBuffer(qsize, itemSz, buf, wlk, rlk, wrtCrsr, rdCrsr)
    
     frame_num = 0
     tStt = time.time()
@@ -50,11 +48,14 @@ def producer(videofile, buf, wlk, rlk, wrtCrsr, rdCrsr, qsize, itemSz):
         h0,h1,h2,h3 = utils.int32_to_uint8x4(frame_num)
         header = np.array([h0,h1,h2,h3], dtype=np.uint8)
         data = np.concatenate((header,frame_gray.reshape(width*height)),axis=None)
-        ok = srb.push(data,block=True,timeout=0.00001)
+        ok = frame_buffer.push(data,block=True,timeout=0.00001)
 
         # Monitor the state of the queue
         if (frame_num % 100) == 0:
-            print("Frame queue usage: " + str(100*srb.size()/srb.totalSize) + "%")
+            print("Frame queue usage: {0}%".format(
+                100*frame_buffer.size()/frame_buffer.totalSize
+                )
+            )
 
     # Wait for all frames to be consumed
     while not srb.empty():
@@ -69,15 +70,13 @@ def producer(videofile, buf, wlk, rlk, wrtCrsr, rdCrsr, qsize, itemSz):
     
     print("Producer time: " +  str(time.time()-tStt))
 
-def consumer(buf, wlk, rlk, wrtCrsr, rdCrsr, qsize, itemSz, process_num, process_fun):
+def consumer(frame_buffer, process_num, process_fun):
     """process images from the queue """
 
-    srb = SharedRingBuffer(qsize, itemSz, buf, wlk, rlk, wrtCrsr, rdCrsr)
-    
     tStt = time.time()
     while True: 
         # get frame and frame number from the queue
-        ok, data = srb.pop(block=False,timeout=0.000001)                                                                                                             
+        ok, data = frame_buffer.pop(block=False,timeout=0.00001)                                                                                                             
         if ok:
             data = np.asarray(data)
             header, frame = np.split(data,[4])
@@ -93,7 +92,7 @@ def consumer(buf, wlk, rlk, wrtCrsr, rdCrsr, qsize, itemSz, process_num, process
 
     print("Consumer {0} time: {1}".format(process_num,time.time()-tStt))
 
-def start(buf, wlk, rlk, wrtCrsr,rdCrsr, videofile, qsize, itemSz, n_consumers, process_fun):
+def start(frame_buffer, videofile, n_consumers, process_fun):
     """spawn all the processes"""
 
     # start consumers and producers                                             
@@ -101,14 +100,14 @@ def start(buf, wlk, rlk, wrtCrsr,rdCrsr, videofile, qsize, itemSz, n_consumers, 
     for i in range(n_consumers):                                                
         p = Process(
             target=consumer, 
-            args=(buf, wlk, rlk, wrtCrsr, rdCrsr, qsize, itemSz, i, process_fun),
+            args=(frame_buffer, i, process_fun),
         )
         consumer_process.append(p)                                              
         p.start()
 
     producer_process = Process(
         target=producer, 
-        args=(videofile, buf, wlk, rlk, wrtCrsr, rdCrsr, qsize, itemSz)
+        args=(videofile, frame_buffer)
         )    
     producer_process.start()
 
@@ -135,30 +134,24 @@ if __name__ == "__main__":
     cap = cv2.VideoCapture(videofile,cv2.CAP_FFMPEG)
     width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
     height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
+    depth = 1 # TODO find how to get that (in bytes)
     cap.release()
 
     ## FORCE HOST
     host = True
 
     print('Allocate buffer')
-    itemSize = width*height+4 # image + 4 bytes header 
-    rlk = Lock()
-    wlk = Lock()
-    buf = RawArray('B',qsize*itemSize) #uint8 frame data + 4 bytes header
-    wrtCrsr = RawValue('i',0)
-    rdCrsr = RawValue('i',0)
+    headerSize = 4 # 4 bytes header
+    imageSize = width * height * depth # n bytes image 
+    itemSize = imageSize + headerSize 
+    frame_buffer = SharedRingBuffer(qsize, itemSize)
+    print('done')
 
     num_frames = 0
     start_time = time.time()
     num_frames = start(
-        buf,
-        wlk,
-        rlk,
-        wrtCrsr,
-        rdCrsr,
+        frame_buffer,
         videofile, 
-        qsize,
-        itemSize,
         n_consumers, 
         pfun
     )
