@@ -1,4 +1,3 @@
-from threading import Thread
 from multiprocessing import Process, Lock
 from multiprocessing.sharedctypes import RawArray, RawValue
 import time
