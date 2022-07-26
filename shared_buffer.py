@@ -24,7 +24,7 @@ class SharedRingBuffer:
 
     def full(self):
         return self.write_cursor.value == (
-            (self.read_cursor.value-self.itemSize)%self.totalSize
+            (self.read_cursor.value - self.itemSize) % self.totalSize
             )
 
     def empty(self):
@@ -101,6 +101,8 @@ class SharedRingBuffer:
 
     def size(self):
         ''' Return number of items currently stored in the buffer '''
-        return (self.write_cursor.value-self.read_cursor.value)%self.totalSize
+        return (
+            (self.write_cursor.value - self.read_cursor.value) % self.totalSize
+            )
 
     
